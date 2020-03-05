@@ -11,7 +11,6 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/pusher/oauth2_proxy/pkg/apis/sessions"
-	"github.com/pusher/oauth2_proxy/pkg/requests"
 )
 
 // OIDCProvider represents an OIDC based Identity Provider
@@ -203,31 +202,34 @@ func findClaimsFromIDToken(idToken *oidc.IDToken, accessToken string, profileURL
 	}
 
 	if claims.Email == "" {
-		if profileURL == "" {
-			return nil, fmt.Errorf("id_token did not contain an email")
-		}
 
-		// If the userinfo endpoint profileURL is defined, then there is a chance the userinfo
-		// contents at the profileURL contains the email.
-		// Make a query to the userinfo endpoint, and attempt to locate the email from there.
+		claims.Email = fmt.Sprintf("oauth2_proxy_fake_sub_%s@example.com", claims.Subject) // FIXME Telia workaround for optional emails
 
-		req, err := http.NewRequest("GET", profileURL, nil)
-		if err != nil {
-			return nil, err
-		}
-		req.Header = getOIDCHeader(accessToken)
-
-		respJSON, err := requests.Request(req)
-		if err != nil {
-			return nil, err
-		}
-
-		email, err := respJSON.Get("email").String()
-		if err != nil {
-			return nil, fmt.Errorf("neither id_token nor userinfo endpoint contained an email")
-		}
-
-		claims.Email = email
+		//if profileURL == "" {
+		//	return nil, fmt.Errorf("id_token did not contain an email")
+		//}
+		//
+		//// If the userinfo endpoint profileURL is defined, then there is a chance the userinfo
+		//// contents at the profileURL contains the email.
+		//// Make a query to the userinfo endpoint, and attempt to locate the email from there.
+		//
+		//req, err := http.NewRequest("GET", profileURL, nil)
+		//if err != nil {
+		//	return nil, err
+		//}
+		//req.Header = getOIDCHeader(accessToken)
+		//
+		//respJSON, err := requests.Request(req)
+		//if err != nil {
+		//	return nil, err
+		//}
+		//
+		//email, err := respJSON.Get("email").String()
+		//if err != nil {
+		//	return nil, fmt.Errorf("neither id_token nor userinfo endpoint contained an email")
+		//}
+		//
+		//claims.Email = email
 	}
 
 	return claims, nil
